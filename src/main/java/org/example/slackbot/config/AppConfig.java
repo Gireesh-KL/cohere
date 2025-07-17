@@ -2,12 +2,17 @@ package org.example.slackbot.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 public class AppConfig {
-    @Value("${slack.bot.token}")
-    public String slackBotToken;
 
     @Value("${cohere.api.key}")
-    public String cohereApiKey;
+    private String cohereApiKey;
+
+    @Value("${slack.bot.token}")
+    private String slackBotToken;
+
+    // getters
 }
+
