@@ -7,11 +7,11 @@ import org.apache.hc.core5.http.ContentType;
 
 @Service
 public class CohereService {
-
     @Value("${cohere.api.key}")
     private String cohereApiKey;
 
     public String generateReply(String userPrompt) throws Exception {
+        System.out.println(cohereApiKey);
         String jsonRequest = """
         {
           "model": "command-r-plus",
