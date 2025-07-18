@@ -30,7 +30,7 @@ public class SlackController {
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
         System.out.println("SlackEvent Object: " + slackEvent);
-        System.out.println("SlackEvent JSON: " + new ObjectMapper().writeValueAsString(slackEvent));
+//        System.out.println("SlackEvent JSON: " + new ObjectMapper().writeValueAsString(slackEvent));
 
         if ("url_verification".equals(slackEvent.getType())) {
             return ResponseEntity.ok(slackEvent.getChallenge());
@@ -42,7 +42,7 @@ public class SlackController {
         System.out.println(event.getUser());
         System.out.println(event.getChannel());
         System.out.println(event.getType());
-        if (event != null && event.getText() != null && event.getUser() != null && !"USLACKBOT".equals(event.getUser())) {
+        if (event.getText() != null && event.getUser() != null && !"USLACKBOT".equals(event.getUser())) {
             System.out.println("I'm inside bro");
             String prompt = event.getText().replaceAll("<@\\w+>", "").trim();
             String response = cohereService.generateReply(prompt);
