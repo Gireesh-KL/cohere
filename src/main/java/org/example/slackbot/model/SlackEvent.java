@@ -18,4 +18,15 @@ public class SlackEvent {
         return challenge;
     }
     public void setChallenge(String challenge) { this.challenge = challenge; }
+
+    @Override
+    public String toString() {
+        return "SlackEvent{" +
+                "type='" + type + '\'' +
+                ", event=" + event +
+                ", challenge='" + challenge + '\'' +
+                '}';
+    }
 }
+
+

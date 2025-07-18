@@ -1,5 +1,6 @@
 package org.example.slackbot.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.slackbot.model.SlackEvent;
 import org.example.slackbot.service.CohereService;
 import org.example.slackbot.config.AppConfig;
@@ -23,6 +24,7 @@ public class SlackController {
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
         System.out.println(slackEvent);
+        System.out.println("SlackEvent JSON: " + new ObjectMapper().writeValueAsString(slackEvent));
         if ("url_verification".equals(slackEvent.getType())) {
             String challenge = slackEvent.getChallenge();  // correct now
             System.out.println("Challenge received: " + challenge);
