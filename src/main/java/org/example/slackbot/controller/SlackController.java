@@ -23,22 +23,18 @@ public class SlackController {
 
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
-        System.out.println(slackEvent);
+        System.out.println("SlackEvent Object: " + slackEvent);
         System.out.println("SlackEvent JSON: " + new ObjectMapper().writeValueAsString(slackEvent));
-        if ("url_verification".equals(slackEvent.getType())) {
-            String challenge = slackEvent.getChallenge();  // correct now
-            System.out.println("Challenge received: " + challenge);
-            return ResponseEntity.ok(challenge);
-        }
-        Map<String, Object> event = slackEvent.getEvent();
-        String user = (String) event.get("user");
-        String text = (String) event.get("text");
-        String channel = (String) event.get("channel");
 
-        if (text != null && user != null) {
-            String response = cohereService.generateReply(text);
-            System.out.println(response);
-            sendMessageToSlack(channel, response);
+        if ("url_verification".equals(slackEvent.getType())) {
+            return ResponseEntity.ok(slackEvent.getChallenge());
+        }
+
+        SlackEvent.InnerEvent event = slackEvent.getEvent();
+        if (event != null && event.getText() != null && event.getUser() != null) {
+            String response = cohereService.generateReply(event.getText());
+            System.out.println("Cohere Response: " + response);
+            sendMessageToSlack(event.getChannel(), response);
         }
 
         return ResponseEntity.ok().build();
