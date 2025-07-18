@@ -22,7 +22,10 @@ public class SlackController {
 
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
-
+        if ("url_verification".equals(slackEvent.getType())) {
+            String challenge = slackEvent.getType();
+            return ResponseEntity.ok(challenge);
+        }
         Map<String, Object> event = slackEvent.getEvent();
         String user = (String) event.get("user");
         String text = (String) event.get("text");
