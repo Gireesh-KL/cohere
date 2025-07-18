@@ -31,6 +31,11 @@ public class SlackController {
         }
 
         SlackEvent.InnerEvent event = slackEvent.getEvent();
+        System.out.println("SlackEvent InnerEvent: " + event);
+        System.out.println(event.getText());
+        System.out.println(event.getUser());
+        System.out.println(event.getChannel());
+        System.out.println(event.getType());
         if (event != null && event.getText() != null && event.getUser() != null) {
             String response = cohereService.generateReply(event.getText());
             System.out.println("Cohere Response: " + response);
