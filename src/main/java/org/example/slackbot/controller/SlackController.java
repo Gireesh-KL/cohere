@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
 import java.util.Map;
+
+
 
 @RestController
 public class SlackController {
@@ -20,6 +24,8 @@ public class SlackController {
 
     @Autowired
     private AppConfig config;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
@@ -48,20 +54,28 @@ public class SlackController {
     }
 
     private void sendMessageToSlack(String channel, String text) throws Exception {
-        String jsonPayload = """
-        {
-          "channel": "%s",
-          "text": "%s"
-        }
-        """.formatted(channel, text);
+        Map<String, String> payload = new HashMap<>();
+        payload.put("channel", channel);
+        payload.put("text", text);
+        String jsonPayload = objectMapper.writeValueAsString(payload);
+        System.out.println("Final Payload: " + jsonPayload);
+//        String jsonPayload = """
+//        {
+//          "channel": "%s",
+//          "text": "%s"
+//        }
+//        """.formatted(channel, text);
+//
+//        System.out.println(jsonPayload);
 
-        System.out.println(jsonPayload);
-
-        Request.post("https://slack.com/api/chat.postMessage")
+        String response = Request.post("https://slack.com/api/chat.postMessage")
                 .addHeader("Authorization", "Bearer " + config.getSlackBotToken())
                 .addHeader("Content-Type", "application/json")
                 .bodyString(jsonPayload, ContentType.APPLICATION_JSON)
                 .execute()
-                .discardContent();
+                .returnContent()
+                .asString();
+
+        System.out.println("Slack Response: " + response);
     }
 }
