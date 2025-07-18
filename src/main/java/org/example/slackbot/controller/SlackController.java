@@ -22,9 +22,6 @@ public class SlackController {
 
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
-        if ("url_verification".equals(slackEvent.getType())) {
-            return ResponseEntity.ok(Map.of("challenge", slackEvent.getEvent().get("challenge")));
-        }
 
         Map<String, Object> event = slackEvent.getEvent();
         String user = (String) event.get("user");
@@ -33,6 +30,7 @@ public class SlackController {
 
         if (text != null && user != null) {
             String response = cohereService.generateReply(text);
+            System.out.println(response);
             sendMessageToSlack(channel, response);
         }
 
@@ -47,8 +45,10 @@ public class SlackController {
         }
         """.formatted(channel, text);
 
+        System.out.println(jsonPayload);
+
         Request.post("https://slack.com/api/chat.postMessage")
-                .addHeader("Authorization", "Bearer " + config.slackBotToken)
+                .addHeader("Authorization", "Bearer " + config.getSlackBotToken())
                 .addHeader("Content-Type", "application/json")
                 .bodyString(jsonPayload, ContentType.APPLICATION_JSON)
                 .execute()
