@@ -19,5 +19,13 @@ public class AppConfig {
     public String getSlackBotToken() {
         return slackBotToken;
     }
+
+    @Value("${slack.bot.userId}")
+    private String slackBotUserId;
+
+    public String getSlackBotUserId() {
+        return slackBotUserId;
+    }
+
 }
 
