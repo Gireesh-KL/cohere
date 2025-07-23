@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.Map;
-
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SlackEvent {
     private String type;
     private InnerEvent event;
@@ -17,6 +18,7 @@ public class SlackEvent {
         private String type;
         private String text;
         private String channel;
+        private String bot_id;
 
         public String getBot_id() {
             return bot_id;
@@ -26,9 +28,6 @@ public class SlackEvent {
             this.bot_id = bot_id;
         }
 
-        private String bot_id;
-
-        // Getters and setters
         public String getUser() { return user; }
         public void setUser(String user) { this.user = user; }
 

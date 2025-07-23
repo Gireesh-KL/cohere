@@ -38,7 +38,6 @@ public class SlackController {
 
         SlackEvent.InnerEvent event = slackEvent.getEvent();
         if (event == null || event.getBot_id() != null) {
-            // It's a bot message — ignore
             return ResponseEntity.ok().build();
         }
         System.out.println("SlackEvent InnerEvent: " + event);
