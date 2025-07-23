@@ -1,5 +1,8 @@
 package org.example.slackbot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
 import java.util.Map;
 
 public class SlackEvent {
@@ -7,11 +10,23 @@ public class SlackEvent {
     private InnerEvent event;
     private String challenge;
 
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class InnerEvent {
         private String user;
         private String type;
         private String text;
         private String channel;
+
+        public String getBot_id() {
+            return bot_id;
+        }
+
+        public void setBot_id(String bot_id) {
+            this.bot_id = bot_id;
+        }
+
+        private String bot_id;
 
         // Getters and setters
         public String getUser() { return user; }
