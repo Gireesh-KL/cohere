@@ -19,6 +19,17 @@ public class SlackEvent {
         private String text;
         private String channel;
         private String bot_id;
+        private String subtype;
+
+
+        public String getSubtype() {
+            return subtype;
+        }
+
+        public void setSubtype(String subtype) {
+            this.subtype = subtype;
+        }
+
 
         public String getBot_id() {
             return bot_id;

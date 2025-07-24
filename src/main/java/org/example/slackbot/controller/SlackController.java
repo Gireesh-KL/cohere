@@ -46,11 +46,15 @@ public class SlackController {
         System.out.println(event.getChannel());
         System.out.println(event.getType());
 
-        if (event == null || event.getUser() == null || event.getUser().equals(config.getSlackBotUserId())) {
+        if (event.getUser() == null || event.getUser().equals(config.getSlackBotUserId())) {
             return ResponseEntity.ok().build();
         }
 
-        if (event.getText() != null && event.getUser() != null && !"USLACKBOT".equals(event.getUser())) {
+        if ("bot_message".equals(event.getSubtype())) {
+            return ResponseEntity.ok().build();
+        }
+
+        if (event.getText() != null && event.getUser() != null) {
             System.out.println("I'm inside bro");
             String prompt = event.getText().replaceAll("<@\\w+>", "").trim();
             String response = cohereService.generateReply(prompt);
