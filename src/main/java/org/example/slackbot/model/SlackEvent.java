@@ -21,6 +21,11 @@ public class SlackEvent {
         private String bot_id;
         private String subtype;
 
+        public boolean isFromBot() {
+            return (bot_id != null && !bot_id.isEmpty()) ||
+                    (subtype != null && subtype.equals("bot_message")) ||
+                    (user != null && user.equals("U0967ACAU2E"));  // Replace with config.getSlackBotUserId()
+        }
 
         public String getSubtype() {
             return subtype;

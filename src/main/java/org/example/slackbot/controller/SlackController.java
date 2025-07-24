@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,32 +29,31 @@ public class SlackController {
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
         System.out.println("SlackEvent Object: " + slackEvent);
-//        System.out.println("SlackEvent JSON: " + new ObjectMapper().writeValueAsString(slackEvent));
 
         if ("url_verification".equals(slackEvent.getType())) {
             return ResponseEntity.ok(slackEvent.getChallenge());
         }
 
         SlackEvent.InnerEvent event = slackEvent.getEvent();
-        if (event == null || event.getBot_id() != null) {
+
+        if (event == null || event.isFromBot()) {
+            System.out.println("Ignored: Event is from bot or invalid: " + event);
             return ResponseEntity.ok().build();
         }
+
+        if ("bot_message".equals(event.getSubtype())) {
+            System.out.println("Ignored: Subtype is bot message: " + event);
+            return ResponseEntity.ok().build();
+        }
+
         System.out.println("SlackEvent InnerEvent: " + event);
         System.out.println(event.getText());
         System.out.println(event.getUser());
         System.out.println(event.getChannel());
         System.out.println(event.getType());
 
-        if (event.getUser() == null || event.getUser().equals(config.getSlackBotUserId())) {
-            return ResponseEntity.ok().build();
-        }
-
-        if ("bot_message".equals(event.getSubtype())) {
-            return ResponseEntity.ok().build();
-        }
-
         if (event.getText() != null && event.getUser() != null) {
-            System.out.println("I'm inside bro");
+            System.out.println("I'm inside cohereservice section");
             String prompt = event.getText().replaceAll("<@\\w+>", "").trim();
             String response = cohereService.generateReply(prompt);
             System.out.println("Cohere Response: " + response);
@@ -71,14 +69,6 @@ public class SlackController {
         payload.put("text", text);
         String jsonPayload = objectMapper.writeValueAsString(payload);
         System.out.println("Final Payload: " + jsonPayload);
-//        String jsonPayload = """
-//        {
-//          "channel": "%s",
-//          "text": "%s"
-//        }
-//        """.formatted(channel, text);
-//
-//        System.out.println(jsonPayload);
 
         String response = Request.post("https://slack.com/api/chat.postMessage")
                 .addHeader("Authorization", "Bearer " + config.getSlackBotToken())
