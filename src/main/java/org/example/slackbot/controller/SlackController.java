@@ -29,6 +29,7 @@ public class SlackController {
     @PostMapping("/slack/events")
     public ResponseEntity<?> handleSlackEvent(@RequestBody SlackEvent slackEvent) throws Exception {
         System.out.println("SlackEvent Object: " + slackEvent);
+        System.out.println("Raw SlackEvent JSON: " + objectMapper.writeValueAsString(slackEvent));
 
         if ("url_verification".equals(slackEvent.getType())) {
             return ResponseEntity.ok(slackEvent.getChallenge());
@@ -45,6 +46,12 @@ public class SlackController {
             System.out.println("Ignored: Subtype is bot message: " + event);
             return ResponseEntity.ok().build();
         }
+
+        if (!"app_mention".equals(event.getType())) {
+            System.out.println("Ignored: Not an app_mention event");
+            return ResponseEntity.ok().build();
+        }
+
 
         System.out.println("SlackEvent InnerEvent: " + event);
         System.out.println(event.getText());
