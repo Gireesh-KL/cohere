@@ -51,15 +51,15 @@ public class SlackEvent {
         public String getChannel() { return channel; }
         public void setChannel(String channel) { this.channel = channel; }
 
-        @Override
-        public String toString() {
-            return "InnerEvent{" +
-                    "user='" + user + '\'' +
-                    ", type='" + type + '\'' +
-                    ", text='" + text + '\'' +
-                    ", channel='" + channel + '\'' +
-                    '}';
-        }
+//        @Override
+//        public String toString() {
+//            return "InnerEvent{" +
+//                    "user='" + user + '\'' +
+//                    ", type='" + type + '\'' +
+//                    ", text='" + text + '\'' +
+//                    ", channel='" + channel + '\'' +
+//                    '}';
+//        }
     }
 
     // Getters and setters
@@ -72,12 +72,12 @@ public class SlackEvent {
     public String getChallenge() { return challenge; }
     public void setChallenge(String challenge) { this.challenge = challenge; }
 
-    @Override
-    public String toString() {
-        return "SlackEvent{" +
-                "type='" + type + '\'' +
-                ", event=" + event +
-                ", challenge='" + challenge + '\'' +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "SlackEvent{" +
+//                "type='" + type + '\'' +
+//                ", event=" + event +
+//                ", challenge='" + challenge + '\'' +
+//                '}';
+//    }
 }
