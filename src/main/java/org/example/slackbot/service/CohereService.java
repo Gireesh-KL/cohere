@@ -16,7 +16,7 @@ public class CohereService {
         {
           "model": "command-r-plus",
           "prompt": "%s",
-          "max_tokens": 10000,
+          "max_tokens": 1000000,
           "temperature": 0.7
         }
         """.formatted(userPrompt);

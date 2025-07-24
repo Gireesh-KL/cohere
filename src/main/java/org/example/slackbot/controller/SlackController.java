@@ -37,27 +37,13 @@ public class SlackController {
 
         SlackEvent.InnerEvent event = slackEvent.getEvent();
 
-        if (event == null) {
-            return ResponseEntity.ok().build();
-        }
-
-        if (event.isFromBot()) {
-            System.out.println("Ignored: Event is from bot or invalid: " + event);
-            return ResponseEntity.ok().build();
-        }
-
-        if ("bot_message".equals(event.getSubtype())) {
-            System.out.println("Ignored: Subtype is bot message: " + event);
+        if (event == null || event.isFromBot() || "bot_message".equals(event.getSubtype())) {
+            System.out.println("Ignored bot/self event: " + event);
             return ResponseEntity.ok().build();
         }
 
         if (!"app_mention".equals(event.getType())) {
             System.out.println("Ignored: Not an app_mention event");
-            return ResponseEntity.ok().build();
-        }
-
-        if ("message".equals(event.getType()) && event.getBot_id() != null) {
-            System.out.println("Ignored: Message from bot");
             return ResponseEntity.ok().build();
         }
 
@@ -68,16 +54,37 @@ public class SlackController {
         System.out.println(event.getChannel());
         System.out.println(event.getType());
 
-        if (event.getText() != null && event.getUser() != null) {
-            System.out.println("I'm inside cohereservice section");
-            String prompt = event.getText().replaceAll("<@\\w+>", "").trim();
-            String response = cohereService.generateReply(prompt);
-            System.out.println("Cohere Response: " + response);
-            sendMessageToSlack(event.getChannel(), response);
-        }
+        ResponseEntity<?> slackAck = ResponseEntity.ok().build();
 
-        return ResponseEntity.ok().build();
+        new Thread(() -> {
+            try {
+                if (event.getText() != null && event.getUser() != null) {
+                    System.out.println("Processing user event asynchronously...");
+                    String prompt = event.getText().replaceAll("<@\\w+>", "").trim();
+                    String response = cohereService.generateReply(prompt);
+                    System.out.println("Cohere Response: " + response);
+                    sendMessageToSlack(event.getChannel(), response);
+                }
+                else {
+                    System.out.println("Use Null or Text Null");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        return slackAck;
     }
+//        if (event.getText() != null && event.getUser() != null) {
+//            System.out.println("I'm inside cohereservice section");
+//            String prompt = event.getText().replaceAll("<@\\w+>", "").trim();
+//            String response = cohereService.generateReply(prompt);
+//            System.out.println("Cohere Response: " + response);
+//            sendMessageToSlack(event.getChannel(), response);
+//        }
+
+//        return ResponseEntity.ok().build();
+//    }
 
     private void sendMessageToSlack(String channel, String text) throws Exception {
         Map<String, String> payload = new HashMap<>();
@@ -94,6 +101,6 @@ public class SlackController {
                 .returnContent()
                 .asString();
 
-        System.out.println("Slack Response: " + response);
+        System.out.println("Slack API Response: " + response);
     }
 }
