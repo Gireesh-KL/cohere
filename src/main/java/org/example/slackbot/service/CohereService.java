@@ -5,21 +5,26 @@ import org.springframework.stereotype.Service;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class CohereService {
     @Value("${cohere.api.key}")
     private String cohereApiKey;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public String generateReply(String userPrompt) throws Exception {
-        System.out.println(cohereApiKey);
+//        System.out.println(cohereApiKey);
         String jsonRequest = """
         {
           "model": "command-r-plus",
           "prompt": "%s",
-          "max_tokens": 1000000,
+          "max_tokens": 10000,
           "temperature": 0.7
         }
-        """.formatted(userPrompt);
+        """.formatted(userPrompt.replace("\"", "\\\""));
 
         String response = Request.post("https://api.cohere.ai/v1/generate")
                 .addHeader("Authorization", "Bearer " + cohereApiKey)
@@ -29,8 +34,13 @@ public class CohereService {
                 .returnContent()
                 .asString();
 
-        // Extract text manually (can also use Jackson)
-        String reply = response.split("\"text\":\"")[1].split("\"")[0];
-        return reply.replace("\\n", "\n").trim();
+        JsonNode jsonNode = objectMapper.readTree(response);
+        JsonNode textNode = jsonNode.path("generations").path(0).path("text");
+        if (textNode.isMissingNode()) {
+            throw new RuntimeException("Cohere API did not return expected text.");
+        }
+        return textNode.asText().trim();
+//        String reply = response.split("\"text\":\"")[1].split("\"")[0];
+//        return reply.replace("\\n", "\n").trim();
     }
 }
