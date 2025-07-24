@@ -37,7 +37,11 @@ public class SlackController {
 
         SlackEvent.InnerEvent event = slackEvent.getEvent();
 
-        if (event == null || event.isFromBot()) {
+        if (event == null) {
+            return ResponseEntity.ok().build();
+        }
+
+        if (event.isFromBot()) {
             System.out.println("Ignored: Event is from bot or invalid: " + event);
             return ResponseEntity.ok().build();
         }
@@ -49,6 +53,11 @@ public class SlackController {
 
         if (!"app_mention".equals(event.getType())) {
             System.out.println("Ignored: Not an app_mention event");
+            return ResponseEntity.ok().build();
+        }
+
+        if ("message".equals(event.getType()) && event.getBot_id() != null) {
+            System.out.println("Ignored: Message from bot");
             return ResponseEntity.ok().build();
         }
 
