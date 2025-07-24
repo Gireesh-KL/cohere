@@ -20,7 +20,14 @@ public class AppConfig {
         return slackBotToken;
     }
 
-    @Value("${slack.bot.userId}")
+//    @Value("${slack.bot.userId}")
+//    private String slackBotUserId;
+//
+//    public String getSlackBotUserId() {
+//        return slackBotUserId;
+//    }
+
+    @Value("${slack.bot.user-id}")
     private String slackBotUserId;
 
     public String getSlackBotUserId() {

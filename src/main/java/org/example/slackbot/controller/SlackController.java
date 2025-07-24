@@ -47,7 +47,7 @@ public class SlackController {
         System.out.println(event.getType());
 
         if (event == null || event.getUser() == null || event.getUser().equals(config.getSlackBotUserId())) {
-            return ResponseEntity.ok("");
+            return ResponseEntity.ok().build();
         }
 
         if (event.getText() != null && event.getUser() != null && !"USLACKBOT".equals(event.getUser())) {
