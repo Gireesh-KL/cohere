@@ -1,5 +1,6 @@
 package org.example.slackbot.service;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.hc.client5.http.fluent.Request;
@@ -17,14 +18,21 @@ public class CohereService {
 
     public String generateReply(String userPrompt) throws Exception {
 //        System.out.println(cohereApiKey);
-        String jsonRequest = """
-        {
-          "model": "command-r-plus",
-          "prompt": "%s",
-          "max_tokens": 10000,
-          "temperature": 0.7
-        }
-        """.formatted(userPrompt.replace("\"", "\\\""));
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode requestBody = mapper.createObjectNode();
+        requestBody.put("model", "command-r-plus");
+        requestBody.put("prompt", userPrompt);
+        requestBody.put("max_tokens", 1000);
+        requestBody.put("temperature", 0.7);
+//        String jsonRequest = """
+//        {
+//          "model": "command-r-plus",
+//          "prompt": "%s",
+//          "max_tokens": 10000,
+//          "temperature": 0.7
+//        }
+//        """.formatted(userPrompt.replace("\"", "\\\""));
+        String jsonRequest = mapper.writeValueAsString(requestBody);
 
         String response = Request.post("https://api.cohere.ai/v1/generate")
                 .addHeader("Authorization", "Bearer " + cohereApiKey)
