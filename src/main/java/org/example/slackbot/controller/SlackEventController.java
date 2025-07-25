@@ -19,10 +19,8 @@ public class SlackEventController {
 
     @PostMapping("/events")
     public ResponseEntity<?> receiveEvent(@RequestBody String requestBody) {
-        System.out.println("Raw Slack Event Payload:\n" + requestBody); // 🔍 Print full JSON
 
         try {
-            // Parse the string into SlackEvent for actual logic
             ObjectMapper mapper = new ObjectMapper();
             SlackEvent slackEvent = mapper.readValue(requestBody, SlackEvent.class);
 

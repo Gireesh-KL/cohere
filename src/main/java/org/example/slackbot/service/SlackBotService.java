@@ -5,6 +5,7 @@ import org.example.slackbot.channel.SlackChannelClient;
 import org.example.slackbot.config.SlackBotConfig;
 import org.example.slackbot.model.SlackEvent;
 import org.springframework.stereotype.Service;
+import org.example.slackbot.fileprocessor.FileProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -15,35 +16,65 @@ public class SlackBotService {
     private final CohereClient cohereClient;
     private final SlackChannelClient slackClient;
     private final SlackBotConfig config;
+    private final List<FileProcessor> fileProcessors;
 
-    public SlackBotService(CohereClient cohereClient, SlackChannelClient slackClient, SlackBotConfig config) {
+    public SlackBotService(CohereClient cohereClient,
+                           SlackChannelClient slackClient,
+                           SlackBotConfig config,
+                           List<FileProcessor> fileProcessors) {
         this.cohereClient = cohereClient;
         this.slackClient = slackClient;
         this.config = config;
+        this.fileProcessors = fileProcessors;
     }
 
     public void handleMessage(String prompt, String channel, List<Map<String, Object>> files) {
+        StringBuilder contextText = new StringBuilder();
+
         try {
             String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
 
-            StringBuilder contextText = new StringBuilder();
-            if (files != null && !files.isEmpty()) {
+            if (files != null) {
                 for (Map<String, Object> fileMap : files) {
-                    String url = (String) fileMap.get("url_private");
-                    if (url != null) {
-                        String content = slackClient.downloadFile(url);
-                        contextText.append("\n").append(content);
+                    try {
+                        String url = (String) fileMap.get("url_private");
+                        String mimeType = (String) fileMap.get("mimetype");
+                        String name = (String) fileMap.get("name");
+
+                        byte[] fileBytes = slackClient.downloadFileAsBytes(url);
+
+                        boolean processed = false;
+                        for (FileProcessor processor : fileProcessors) {
+                            if (processor.supports(mimeType)) {
+                                String extracted = processor.extractText(fileBytes, name);
+                                contextText.append("\n").append(extracted);
+                                processed = true;
+                                break;
+                            }
+                        }
+
+                        if (!processed) {
+                            contextText.append("\n[Unsupported file: ").append(name).append("]");
+                        }
+
+                    } catch (Exception e) {
+                        contextText.append("\n[Error reading file: ").append(fileMap.get("name")).append("]");
+                        e.printStackTrace();
                     }
                 }
-//                System.out.println("File was like this" + contextText);
             }
 
             String fullPrompt = contextText + "\n\n" + cleanedPrompt;
-
             String response = cohereClient.callCohere(config.getCohereApiKey(), fullPrompt);
             slackClient.sendMessage(channel, response);
+
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                slackClient.sendMessage(channel, "An error occurred while processing your request.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

@@ -27,6 +27,13 @@ public class SlackChannelClient {
                 .asString();
     }
 
+    public byte[] downloadFileAsBytes(String fileUrl) throws Exception {
+        return Request.get(fileUrl)
+                .addHeader("Authorization", "Bearer " + config.getSlackBotToken())
+                .execute()
+                .returnContent()
+                .asBytes();
+    }
 
     public void sendMessage(String channel, String text) throws Exception {
         Map<String, String> payload = new HashMap<>();
