@@ -41,7 +41,7 @@ public class SlackEventController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Invalid Slack event payload.");
+            return ResponseEntity.ok().build();
         }
 
         return ResponseEntity.ok().build();
