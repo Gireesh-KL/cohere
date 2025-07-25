@@ -31,6 +31,7 @@ public class SlackBotService {
                     String content = slackClient.downloadFile(file.getUrl_private()); // new method
                     contextText.append("\n").append(content);
                 }
+                System.out.println("File was like this" + contextText);
             }
 
             String fullPrompt = contextText + "\n\n" + cleanedPrompt;
