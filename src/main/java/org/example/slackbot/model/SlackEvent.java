@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,22 +16,22 @@ public class SlackEvent {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class InnerEvent {
+
+        public List<Map<String, Object>> getFiles() { return files; }
+
+        public void setFiles(List<Map<String, Object>> files) {
+            this.files = files;
+        }
+
         private String user;
         private String type;
         private String text;
         private String channel;
         private String bot_id;
         private String subtype;
-        private List<SlackFile> files;
+        private List<Map<String, Object>> files;
 
 
-        public List<SlackFile> getFiles() {
-            return files;
-        }
-
-        public void setFiles(List<SlackFile> files) {
-            this.files = files;
-        }
 
         public boolean isFromBot() {
             return (bot_id != null && !bot_id.isEmpty()) ||

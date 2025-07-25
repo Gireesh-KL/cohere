@@ -7,6 +7,7 @@ import org.example.slackbot.model.SlackEvent;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SlackBotService {
@@ -21,15 +22,18 @@ public class SlackBotService {
         this.config = config;
     }
 
-    public void handleMessage(String prompt, String channel, List<SlackEvent.InnerEvent.SlackFile> files) {
+    public void handleMessage(String prompt, String channel, List<Map<String, Object>> files) {
         try {
             String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
 
             StringBuilder contextText = new StringBuilder();
             if (files != null && !files.isEmpty()) {
-                for (SlackEvent.InnerEvent.SlackFile file : files) {
-                    String content = slackClient.downloadFile(file.getUrl_private()); // new method
-                    contextText.append("\n").append(content);
+                for (Map<String, Object> fileMap : files) {
+                    String url = (String) fileMap.get("url_private");
+                    if (url != null) {
+                        String content = slackClient.downloadFile(url);
+                        contextText.append("\n").append(content);
+                    }
                 }
                 System.out.println("File was like this" + contextText);
             }
