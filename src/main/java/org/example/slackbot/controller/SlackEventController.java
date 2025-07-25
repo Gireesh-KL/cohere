@@ -28,7 +28,7 @@ public class SlackEventController {
         }
 
         if (SlackConstants.EVENT_APP_MENTION.equals(event.getType())) {
-            new Thread(() -> botService.handleMessage(event.getText(), event.getChannel())).start();
+            new Thread(() -> botService.handleMessage(event.getText(), event.getChannel(), event.getFiles())).start();
         }
 
         return ResponseEntity.ok().build();

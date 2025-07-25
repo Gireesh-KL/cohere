@@ -3,6 +3,8 @@ package org.example.slackbot.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SlackEvent {
@@ -19,11 +21,21 @@ public class SlackEvent {
         private String channel;
         private String bot_id;
         private String subtype;
+        private List<SlackFile> files;
 
         public boolean isFromBot() {
             return (bot_id != null && !bot_id.isEmpty()) ||
                     (subtype != null && subtype.equals("bot_message")) ||
                     (user != null && user.equals("U0967ACAU2E"));  // Replace with config.getSlackBotUserId()
+        }
+
+        @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class SlackFile {
+            private String id;
+            private String name;
+            private String url_private;
+            private String mimetype;
         }
 
         public String getSubtype() {

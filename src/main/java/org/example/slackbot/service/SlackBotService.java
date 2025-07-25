@@ -3,7 +3,10 @@ package org.example.slackbot.service;
 import org.example.slackbot.client.CohereClient;
 import org.example.slackbot.channel.SlackChannelClient;
 import org.example.slackbot.config.SlackBotConfig;
+import org.example.slackbot.model.SlackEvent;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class SlackBotService {
@@ -18,10 +21,21 @@ public class SlackBotService {
         this.config = config;
     }
 
-    public void handleMessage(String prompt, String channel) {
+    public void handleMessage(String prompt, String channel, List<SlackEvent.InnerEvent.SlackFile> files) {
         try {
             String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
-            String response = cohereClient.callCohere(config.getCohereApiKey(), cleanedPrompt);
+
+            StringBuilder contextText = new StringBuilder();
+            if (files != null && !files.isEmpty()) {
+                for (SlackEvent.InnerEvent.SlackFile file : files) {
+                    String content = slackClient.downloadFile(file.getUrl_private()); // new method
+                    contextText.append("\n").append(content);
+                }
+            }
+
+            String fullPrompt = contextText + "\n\n" + cleanedPrompt;
+
+            String response = cohereClient.callCohere(config.getCohereApiKey(), fullPrompt);
             slackClient.sendMessage(channel, response);
         } catch (Exception e) {
             e.printStackTrace();
