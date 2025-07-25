@@ -23,9 +23,18 @@ public class SlackEvent {
         private String subtype;
         private List<SlackFile> files;
 
+
+        public List<SlackFile> getFiles() {
+            return files;
+        }
+
+        public void setFiles(List<SlackFile> files) {
+            this.files = files;
+        }
+
         public boolean isFromBot() {
             return (bot_id != null && !bot_id.isEmpty()) ||
-                    (subtype != null && subtype.equals("bot_message")) ||
+                    (subtype != null && "bot_message".equalsIgnoreCase(subtype)) ||
                     (user != null && user.equals("U0967ACAU2E"));  // Replace with config.getSlackBotUserId()
         }
 
@@ -36,6 +45,16 @@ public class SlackEvent {
             private String name;
             private String url_private;
             private String mimetype;
+
+            public String getId() { return id; }
+            public void setId(String id) { this.id = id; }
+
+            public String getName() { return name; }
+            public void setName(String name) { this.name = name; }
+
+            public String getUrl_private() { return url_private; }
+            public void setUrl_private(String url_private) { this.url_private = url_private; }
+
         }
 
         public String getSubtype() {
