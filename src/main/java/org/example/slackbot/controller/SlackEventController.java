@@ -18,6 +18,9 @@ public class SlackEventController {
 
     @PostMapping("/events")
     public ResponseEntity<?> receiveEvent(@RequestBody SlackEvent slackEvent) {
+
+        System.out.println(String.format("Received event: %s", slackEvent));
+
         if (SlackConstants.EVENT_URL_VERIFICATION.equals(slackEvent.getType())) {
             return ResponseEntity.ok(slackEvent.getChallenge());
         }

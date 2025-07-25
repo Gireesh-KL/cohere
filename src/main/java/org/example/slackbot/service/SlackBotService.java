@@ -35,7 +35,7 @@ public class SlackBotService {
                         contextText.append("\n").append(content);
                     }
                 }
-                System.out.println("File was like this" + contextText);
+//                System.out.println("File was like this" + contextText);
             }
 
             String fullPrompt = contextText + "\n\n" + cleanedPrompt;
