@@ -1,3 +1,123 @@
+//plugins {
+////    id 'java'
+////    id 'org.springframework.boot' version '3.2.5'
+////    id 'io.spring.dependency-management' version '1.1.3'
+//    id 'org.springframework.boot' version '2.7.18'
+//    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+//    id 'java'
+//    id 'war'
+//    id 'maven-publish'
+//}
+//
+//group = 'org.example'
+//version = project.hasProperty('artifact_version') ? project.getProperty('artifact_version') : '1.0.0'
+//def warName = project.hasProperty('warName') ? project.getProperty('warName') : 'slackbot-api'
+//def applicationName = project.hasProperty('applicationName') ? project.getProperty('applicationName') : 'slackbot-api'
+//def product = project.hasProperty('product') ? project.getProperty('product') : 'slackbot'
+////version = '1.0-SNAPSHOT'
+//
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_17
+//    targetCompatibility = JavaVersion.VERSION_17
+//}
+//
+//configurations {
+//    compileOnly {
+//        extendsFrom annotationProcessor
+//    }
+//}
+//
+//repositories {
+//    maven { url "https://artifacthub-iad.oci.oraclecorp.com/fsgbubanking-gradle-dev-local" }
+//    maven { url "https://artifacthub-iad.oci.oraclecorp.com/remote-repos" }
+//    maven { url "https://artifacthub-phx.oci.oraclecorp.com/oscs-virtual" }
+//    maven {url "https://artifacthub-iad.oci.oraclecorp.com/coh-release-local"}
+//}
+//
+////repositories {
+////    mavenCentral()
+////}
+//
+//dependencies {
+//    testImplementation platform('org.junit:junit-bom:5.10.0')
+//    testImplementation 'org.junit.jupiter:junit-jupiter'
+//
+//    implementation 'org.springframework.boot:spring-boot-starter-web'
+//    implementation 'org.springframework.boot:spring-boot-starter'
+//
+//    implementation 'com.fasterxml.jackson.core:jackson-core:2.17.0'
+//    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.0'
+//
+////    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
+////    implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.2'
+////    implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.2.1'
+//
+//    implementation 'org.apache.httpcomponents.client5:httpclient5:5.1.3'
+//    implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.2.1'
+//
+//
+////    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+//    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.5'
+//
+////    implementation 'org.projectlombok:lombok:1.18.30'
+////    compileOnly 'org.projectlombok:lombok'
+////    annotationProcessor 'org.projectlombok:lombok'
+//    compileOnly 'org.projectlombok:lombok:1.18.30'
+//    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+//
+//
+//    //
+//
+//    implementation 'com.slack.api:slack-api-client:1.38.1'
+//    implementation 'com.slack.api:bolt:1.38.1'
+//
+//    implementation 'org.json:json:20231013'
+//
+//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//
+//}
+//
+////configurations.all {
+////    resolutionStrategy {
+////        force 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+////        force 'com.fasterxml.jackson.core:jackson-core:2.17.0'
+////        force 'com.fasterxml.jackson.core:jackson-annotations:2.17.0'
+////    }
+////}
+//
+////bootJar {
+////    archiveFileName = 'slackbot-api.jar'
+////}
+//
+//bootJar {
+//    enabled = false
+//}
+//
+//war {
+//    enabled = true
+//    archiveFileName = "${warName}-${version}.war"
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//}
+//
+////processResources {
+////    filesMatching('**/application.yml') {
+////        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+////                'obic.application.name': applicationName,
+////                'coherence.config.application.domain': product
+////        ])
+////    }
+////}
+//
+////publishing {
+////    publications {
+////        mavenJava(MavenPublication) {
+////            artifactId = warName
+////            from components.web
+////        }
+////    }
+////}
+
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.5'
