@@ -2,8 +2,10 @@ package org.example.slackbot.service;
 
 import org.example.slackbot.client.CohereClient;
 import org.example.slackbot.channel.SlackChannelClient;
+import org.example.slackbot.common.exception.SlackProcessingException;
 import org.example.slackbot.config.SlackBotConfig;
 import org.example.slackbot.model.SlackEvent;
+import org.example.slackbot.process.FileProcessingContext;
 import org.springframework.stereotype.Service;
 import org.example.slackbot.fileprocessor.FileProcessor;
 
@@ -13,82 +15,56 @@ import java.util.Map;
 @Service
 public class SlackBotService {
 
-    private final CohereClient cohereClient;
     private final SlackChannelClient slackClient;
+    private final CohereClient cohereClient;
     private final SlackBotConfig config;
-    private final List<FileProcessor> fileProcessors;
+    private final FileProcessingContext processingContext;
 
-    public SlackBotService(CohereClient cohereClient,
-                           SlackChannelClient slackClient,
+    public SlackBotService(SlackChannelClient slackClient,
+                           CohereClient cohereClient,
                            SlackBotConfig config,
-                           List<FileProcessor> fileProcessors) {
-        this.cohereClient = cohereClient;
+                           FileProcessingContext processingContext) {
         this.slackClient = slackClient;
+        this.cohereClient = cohereClient;
         this.config = config;
-        this.fileProcessors = fileProcessors;
+        this.processingContext = processingContext;
     }
 
     public void handleMessage(String prompt, String channel, List<Map<String, Object>> files) {
-        StringBuilder contextText = new StringBuilder();
+        StringBuilder context = new StringBuilder();
+        String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
 
-        try {
-            String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
+        if (files != null) {
+            for (Map<String, Object> file : files) {
+                try {
+                    String url = (String) file.get("url_private");
+                    String mimeType = inferMimeType((String) file.get("name"), (String) file.get("mimetype"));
+                    byte[] fileBytes = slackClient.downloadFileAsBytes(url);
 
-            if (files != null) {
-                for (Map<String, Object> fileMap : files) {
-                    try {
-                        String url = (String) fileMap.get("url_private");
-                        String mimeType = (String) fileMap.get("mimetype");
-                        String name = (String) fileMap.get("name");
+                    String extracted = processingContext.process(fileBytes, mimeType, (String) file.get("name"));
+                    context.append("\n").append(extracted);
 
-                        if (mimeType == null || mimeType.equals("application/octet-stream")) {
-                            if (name.endsWith(".log")) mimeType = "text/plain";
-                            else if (name.endsWith(".csv")) mimeType = "text/csv";
-                            else if (name.endsWith(".pdf")) mimeType = "application/pdf";
-                            else mimeType = "application/octet-stream";
-                        }
-
-                        System.out.println(url);
-                        System.out.println(mimeType);
-                        System.out.println(name);
-
-                        byte[] fileBytes = slackClient.downloadFileAsBytes(url);
-
-                        boolean processed = false;
-                        for (FileProcessor processor : fileProcessors) {
-                            if (processor.supports(mimeType)) {
-                                String extracted = processor.extractText(fileBytes, name);
-                                System.out.println("Extracted text: " + extracted);
-                                contextText.append("\n").append(extracted);
-                                System.out.println("Logging Context: " + contextText);
-                                processed = true;
-                                break;
-                            }
-                        }
-
-                        if (!processed) {
-                            contextText.append("\n[Unsupported file: ").append(name).append("]");
-                        }
-
-                    } catch (Exception e) {
-                        contextText.append("\n[Error reading file: ").append(fileMap.get("name")).append("]");
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    context.append("\n[Error reading file: ").append(file.get("name")).append("]");
                 }
             }
+        }
 
-            String fullPrompt = contextText + "\n\n" + cleanedPrompt;
-            System.out.println("This is the full prompt" + fullPrompt);
-            String response = cohereClient.callCohere(config.getCohereApiKey(), fullPrompt);
+        try {
+            String response = cohereClient.callCohere(config.getCohereApiKey(), context + "\n\n" + cleanedPrompt);
             slackClient.sendMessage(channel, response);
-
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                slackClient.sendMessage(channel, "An error occurred while processing your request.");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            throw new SlackProcessingException("Cohere call or Slack message failed", e);
         }
     }
+
+    private String inferMimeType(String name, String mimeType) {
+        if (mimeType == null || mimeType.equals("application/octet-stream")) {
+            if (name.endsWith(".log")) return "text/plain";
+            else if (name.endsWith(".csv")) return "text/csv";
+            else if (name.endsWith(".pdf")) return "application/pdf";
+        }
+        return mimeType;
+    }
 }
+
