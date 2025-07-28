@@ -14,13 +14,16 @@ public class PdfFileProcessor implements FileProcessor {
     }
 
     @Override
-    public String extractText(byte[] fileBytes, String fileName) {
+    public String extractText(byte[] fileBytes, String fileName) throws IOException {
+        PDDocument document = null;
         try {
-            PDDocument document = PDDocument.load(new ByteArrayInputStream(fileBytes));
+            document = PDDocument.load(new ByteArrayInputStream(fileBytes));
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
         } catch (IOException e) {
             return "[Error processing PDF: " + e.getMessage() + "]";
+        } finally {
+            document.close();
         }
     }
 }

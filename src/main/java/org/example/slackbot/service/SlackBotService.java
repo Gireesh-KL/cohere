@@ -41,6 +41,13 @@ public class SlackBotService {
                         String mimeType = (String) fileMap.get("mimetype");
                         String name = (String) fileMap.get("name");
 
+                        if (mimeType == null || mimeType.equals("application/octet-stream")) {
+                            if (name.endsWith(".log")) mimeType = "text/plain";
+                            else if (name.endsWith(".csv")) mimeType = "text/csv";
+                            else if (name.endsWith(".pdf")) mimeType = "application/pdf";
+                            else mimeType = "application/octet-stream";
+                        }
+
                         byte[] fileBytes = slackClient.downloadFileAsBytes(url);
 
                         boolean processed = false;

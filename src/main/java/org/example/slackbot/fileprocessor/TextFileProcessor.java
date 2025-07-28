@@ -12,6 +12,12 @@ public class TextFileProcessor implements FileProcessor {
 
     @Override
     public String extractText(byte[] fileBytes, String fileName) {
-        return new String(fileBytes, StandardCharsets.UTF_8);
+        try {
+            String text = new String(fileBytes, StandardCharsets.UTF_8);
+            if (text.contains("\u0000")) throw new IllegalArgumentException("Binary content detected");
+            return text;
+        } catch (Exception e) {
+            return "[Error processing text file or binary detected: " + e.getMessage() + "]";
+        }
     }
 }
