@@ -24,8 +24,11 @@ public class CsvFileProcessor implements FileProcessor {
             InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(fileBytes), StandardCharsets.UTF_8);
             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader().withSkipHeaderRecord());
 
+            int lineCount = 0;
             for (CSVRecord record : csvParser) {
                 content.append(record.toString()).append("\n");
+                lineCount++;
+                if (lineCount >= 100) break;
             }
         } catch (Exception e) {
             return "[Error processing CSV: " + e.getMessage() + "]";
