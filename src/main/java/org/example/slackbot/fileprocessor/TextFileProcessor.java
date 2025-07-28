@@ -29,6 +29,8 @@ public class TextFileProcessor implements FileProcessor {
                 return "[Error: File appears to contain binary data and cannot be processed as text.]";
             }
 
+            System.out.println("Contents are these" + content);
+            System.out.println("Filename is this" + fileName);
             if (fileName.toLowerCase().endsWith(".log")) {
                 System.out.println("I entered here to extract logs: " + fileName);
                 List<String> chunks = extractErrorChunks(fileBytes);
