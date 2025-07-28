@@ -78,6 +78,7 @@ public class SlackBotService {
             }
 
             String fullPrompt = contextText + "\n\n" + cleanedPrompt;
+            System.out.println("This is the full prompt" + fullPrompt);
             String response = cohereClient.callCohere(config.getCohereApiKey(), fullPrompt);
             slackClient.sendMessage(channel, response);
 
