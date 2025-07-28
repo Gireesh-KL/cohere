@@ -31,6 +31,11 @@ public class TextFileProcessor implements FileProcessor {
 
             if (fileName.toLowerCase().endsWith(".log")) {
                 List<String> chunks = extractErrorChunks(fileBytes);
+                int cnt = 0;
+                for(String line : chunks) {
+                    System.out.println("Line No" + cnt + ": " + line);
+                    cnt++;
+                }
                 return chunks.isEmpty() ? "[No error logs found.]" : chunks.get(0);
             }
 
