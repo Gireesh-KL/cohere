@@ -48,6 +48,10 @@ public class SlackBotService {
                             else mimeType = "application/octet-stream";
                         }
 
+                        System.out.println(url);
+                        System.out.println(mimeType);
+                        System.out.println(name);
+
                         byte[] fileBytes = slackClient.downloadFileAsBytes(url);
 
                         boolean processed = false;
@@ -55,6 +59,7 @@ public class SlackBotService {
                             if (processor.supports(mimeType)) {
                                 String extracted = processor.extractText(fileBytes, name);
                                 contextText.append("\n").append(extracted);
+                                System.out.println("Context: " + contextText);
                                 processed = true;
                                 break;
                             }
