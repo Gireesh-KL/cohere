@@ -30,6 +30,7 @@ public class TextFileProcessor implements FileProcessor {
             }
 
             if (fileName.toLowerCase().endsWith(".log")) {
+                System.out.println("I entered here to extract logs: " + fileName);
                 List<String> chunks = extractErrorChunks(fileBytes);
                 int cnt = 0;
                 for(String line : chunks) {
