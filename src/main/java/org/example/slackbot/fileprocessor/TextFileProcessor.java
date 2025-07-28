@@ -1,20 +1,16 @@
 package org.example.slackbot.fileprocessor;
 
 import org.springframework.stereotype.Component;
-import java.nio.charset.StandardCharsets;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Component
 public class TextFileProcessor implements FileProcessor {
 
-    private static final int MAX_CHUNK_SIZE = 4000;
     @Override
     public boolean supports(String mimeType) {
         return mimeType.startsWith("text/") || mimeType.equals("application/octet-stream");
@@ -29,17 +25,8 @@ public class TextFileProcessor implements FileProcessor {
                 return "[Error: File appears to contain binary data and cannot be processed as text.]";
             }
 
-            System.out.println("Contents are these" + content);
-            System.out.println("Filename is this" + fileName);
             if (fileName.toLowerCase().endsWith(".log")) {
-                System.out.println("I entered here to extract logs: " + fileName);
-                List<String> chunks = extractErrorChunks(fileBytes);
-                int cnt = 0;
-                for(String line : chunks) {
-                    System.out.println("Line No" + cnt + ": " + line);
-                    cnt++;
-                }
-                return chunks.isEmpty() ? "[No error logs found.]" : chunks.get(0);
+                return extractAllErrorLogs(fileBytes);
             }
 
             return content;
@@ -48,9 +35,8 @@ public class TextFileProcessor implements FileProcessor {
         }
     }
 
-    private List<String> extractErrorChunks(byte[] fileBytes) {
-        List<String> chunks = new ArrayList<>();
-        StringBuilder currentChunk = new StringBuilder();
+    private String extractAllErrorLogs(byte[] fileBytes) {
+        StringBuilder allErrors = new StringBuilder();
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(fileBytes), StandardCharsets.UTF_8))) {
@@ -71,23 +57,14 @@ public class TextFileProcessor implements FileProcessor {
                             String.join("|", Arrays.copyOfRange(parts, 10, parts.length)).trim() // Message
                     );
 
-                    if (currentChunk.length() + formatted.length() > MAX_CHUNK_SIZE) {
-                        chunks.add(currentChunk.toString());
-                        currentChunk.setLength(0);
-                    }
-
-                    currentChunk.append(formatted);
+                    allErrors.append(formatted);
                 }
             }
 
-            if (currentChunk.length() > 0) {
-                chunks.add(currentChunk.toString());
-            }
-
         } catch (Exception e) {
-            chunks.add("[Error extracting error logs: " + e.getMessage() + "]");
+            return "[Error extracting error logs: " + e.getMessage() + "]";
         }
 
-        return chunks;
+        return allErrors.isEmpty() ? "[No error logs found.]" : allErrors.toString();
     }
 }
