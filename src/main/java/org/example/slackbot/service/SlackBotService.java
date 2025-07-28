@@ -58,9 +58,9 @@ public class SlackBotService {
                         for (FileProcessor processor : fileProcessors) {
                             if (processor.supports(mimeType)) {
                                 String extracted = processor.extractText(fileBytes, name);
-                                System.out.println("Extracted text" + extracted);
+                                System.out.println("Extracted text: " + extracted);
                                 contextText.append("\n").append(extracted);
-                                System.out.println("Context: " + contextText);
+                                System.out.println("Logging Context: " + contextText);
                                 processed = true;
                                 break;
                             }

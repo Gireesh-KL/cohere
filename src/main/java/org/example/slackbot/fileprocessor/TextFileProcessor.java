@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -29,7 +30,8 @@ public class TextFileProcessor implements FileProcessor {
             }
 
             if (fileName.toLowerCase().endsWith(".log")) {
-                return extractErrorChunks(fileBytes);
+                List<String> chunks = extractErrorChunks(fileBytes);
+                return chunks.isEmpty() ? "[No error logs found.]" : chunks.get(0);
             }
 
             return content;
@@ -38,7 +40,7 @@ public class TextFileProcessor implements FileProcessor {
         }
     }
 
-    private String extractErrorChunks(byte[] fileBytes) {
+    private List<String> extractErrorChunks(byte[] fileBytes) {
         List<String> chunks = new ArrayList<>();
         StringBuilder currentChunk = new StringBuilder();
 
@@ -47,12 +49,26 @@ public class TextFileProcessor implements FileProcessor {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.contains("| ERROR |")) {
-                    if (currentChunk.length() + line.length() > MAX_CHUNK_SIZE) {
+                String[] parts = line.split("\\|");
+
+                if (parts.length >= 10 && parts[7].trim().equals("ERROR")) {
+                    String formatted = String.format(
+                            "Timestamp: %s | Host: %s | Thread: %s | Level: %s | Class: %s | Method: %s | Message: %s\n",
+                            parts[0].trim(),     // Timestamp
+                            parts[1].trim(),     // Host
+                            parts[4].trim(),     // Thread
+                            parts[7].trim(),     // Level
+                            parts[8].trim().replace("[", "").replace("]", ""), // Class
+                            parts[9].trim(),     // Method
+                            String.join("|", Arrays.copyOfRange(parts, 10, parts.length)).trim() // Message
+                    );
+
+                    if (currentChunk.length() + formatted.length() > MAX_CHUNK_SIZE) {
                         chunks.add(currentChunk.toString());
                         currentChunk.setLength(0);
                     }
-                    currentChunk.append(line).append("\n");
+
+                    currentChunk.append(formatted);
                 }
             }
 
@@ -61,9 +77,9 @@ public class TextFileProcessor implements FileProcessor {
             }
 
         } catch (Exception e) {
-            return "[Error extracting logs: " + e.getMessage() + "]";
+            chunks.add("[Error extracting error logs: " + e.getMessage() + "]");
         }
 
-        return chunks.isEmpty() ? "[No error logs found.]" : chunks.get(0);
+        return chunks;
     }
 }
