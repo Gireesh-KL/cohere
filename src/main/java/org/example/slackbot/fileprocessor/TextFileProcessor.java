@@ -5,11 +5,13 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class TextFileProcessor implements FileProcessor {
+    @Override
     public boolean supports(String mimeType) {
-        return mimeType != null && mimeType.startsWith("text/");
+        return mimeType.startsWith("text/") || mimeType.equals("application/octet-stream");
     }
 
-    public String extractText(byte[] content, String fileName) {
-        return new String(content, StandardCharsets.UTF_8);
+    @Override
+    public String extractText(byte[] fileBytes, String fileName) {
+        return new String(fileBytes, StandardCharsets.UTF_8);
     }
 }

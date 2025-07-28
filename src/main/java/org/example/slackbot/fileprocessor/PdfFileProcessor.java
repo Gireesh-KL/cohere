@@ -4,16 +4,23 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 @Component
 public class PdfFileProcessor implements FileProcessor {
+    @Override
     public boolean supports(String mimeType) {
-        return "application/pdf".equals(mimeType);
+        return mimeType.equals("application/pdf");
     }
 
-    public String extractText(byte[] content, String fileName) throws Exception {
-        try (PDDocument doc = PDDocument.load(new ByteArrayInputStream(content))) {
-            return new PDFTextStripper().getText(doc);
+    @Override
+    public String extractText(byte[] fileBytes, String fileName) {
+        try {
+            PDDocument document = PDDocument.load(new ByteArrayInputStream(fileBytes));
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document);
+        } catch (IOException e) {
+            return "[Error processing PDF: " + e.getMessage() + "]";
         }
     }
 }
