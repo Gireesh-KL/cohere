@@ -48,30 +48,31 @@ public class SlackBotService {
         }
 
         String sessionId = sessionStorageService.getSessionId(userId, channel);
+        StringBuilder contextBuilder = new StringBuilder();
 
         try {
-            File folder = sessionStorageService.getSessionFolder(sessionId);
-            File[] historyFiles = folder.listFiles((dir, name) -> name.startsWith("prompt_") || name.startsWith("response_"));
-            if (historyFiles != null) {
-                Arrays.sort(historyFiles, Comparator.comparingLong(File::lastModified)); // Oldest to newest
-                for (int i = Math.max(0, historyFiles.length - 5); i < historyFiles.length; i++) {
-                    context.append(Files.readString(historyFiles[i].toPath())).append("\n");
-                }
-            }
-            sessionStorageService.saveText(sessionId, "prompt_" + System.currentTimeMillis() + ".txt", cleanedPrompt);
-            System.out.println("Saved prompt: " + "prompt_" + System.currentTimeMillis() + ".txt");
+            contextBuilder.append(sessionStorageService.getFullPromptHistory(sessionId));
+            contextBuilder.append(sessionStorageService.getFullResponseHistory(sessionId));
         } catch (IOException e) {
-            System.err.println("Failed to save prompt: " + e.getMessage());
+            System.err.println("Failed to load session history: " + e.getMessage());
+        }
+
+        try {
+            sessionStorageService.appendPrompt(sessionId, cleanedPrompt, null);
+            System.out.println("Appended prompt to session " + sessionId);
+        } catch (IOException e) {
+            System.err.println("Failed to append prompt: " + e.getMessage());
         }
 
         if (files != null) {
             for (Map<String, Object> file : files) {
                 try {
+                    String fileName = (String) file.get("name");
                     String url = (String) file.get("url_private");
-                    String mimeType = inferMimeType((String) file.get("name"), (String) file.get("mimetype"));
+                    String mimeType = inferMimeType(fileName, (String) file.get("mimetype"));
                     byte[] fileBytes = slackClient.downloadFileAsBytes(url);
 
-                    sessionStorageService.saveFile(sessionId, (String) file.get("name"), fileBytes);
+                    sessionStorageService.saveFile(sessionId, fileName, fileBytes);
 
                     System.out.println("Session [" + sessionId + "] updated. Files in session folder:");
                     File folder = sessionStorageService.getSessionFolder(sessionId);
@@ -79,8 +80,11 @@ public class SlackBotService {
                         System.out.println(" - " + f.getName());
                     }
 
-                    String extracted = processingContext.process(fileBytes, mimeType, (String) file.get("name"));
+                    String extracted = processingContext.process(fileBytes, mimeType, fileName);
                     context.append("\n").append(extracted);
+
+                    sessionStorageService.appendPrompt(sessionId, extracted, fileName);
+                    System.out.println("Processed and appended file: " + fileName);
 
                 } catch (Exception e) {
                     context.append("\n[Error reading file: ").append(file.get("name")).append("]");
@@ -89,9 +93,10 @@ public class SlackBotService {
         }
 
         try {
-            String response = cohereClient.callCohere(config.getCohereApiKey(), context + "\n\n" + cleanedPrompt);
-            sessionStorageService.saveText(sessionId, "response_" + System.currentTimeMillis() + ".txt", response);
-            System.out.println("Saved response: " + "response_" + System.currentTimeMillis() + ".txt");
+            String response = cohereClient.callCohere(config.getCohereApiKey(), "Previous context was this: " + contextBuilder + "\nNow User Prompt is: " + context + "\n\n" + cleanedPrompt);
+//            sessionStorageService.saveText(sessionId, "response_" + System.currentTimeMillis() + ".txt", response);
+            sessionStorageService.appendResponse(sessionId, response, null);
+            System.out.println("Response sent and saved");
             slackClient.sendMessage(channel, response);
         } catch (Exception e) {
             throw new SlackProcessingException("Cohere call or Slack message failed", e);

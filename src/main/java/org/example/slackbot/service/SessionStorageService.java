@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -24,11 +25,38 @@ public class SessionStorageService {
         return folder;
     }
 
-    public void saveText(String sessionId, String fileName, String content) throws IOException {
+    public void appendPrompt(String sessionId, String prompt, String sourceFileName) throws IOException {
         File folder = getSessionFolder(sessionId);
-        File file = new File(folder, fileName);
-        Files.write(file.toPath(), content.getBytes());
+        File file = new File(folder, "prompts.txt");
+        try (FileWriter writer = new FileWriter(file, true)) {
+            writer.write("[Prompt");
+            if (sourceFileName != null) writer.write(" from: " + sourceFileName);
+            writer.write("] " + prompt + "\n\n");
+        }
+    }
 
+    public void appendResponse(String sessionId, String response, String sourceFileName) throws IOException {
+        File folder = getSessionFolder(sessionId);
+        File file = new File(folder, "responses.txt");
+        try (FileWriter writer = new FileWriter(file, true)) {
+            writer.write("[Response");
+            if (sourceFileName != null) writer.write(" for: " + sourceFileName);
+            writer.write("] " + response + "\n\n");
+        }
+    }
+
+    public String getFullPromptHistory(String sessionId) throws IOException {
+        File folder = getSessionFolder(sessionId);
+        File promptFile = new File(folder, "prompts.txt");
+        if (!promptFile.exists()) return "";
+        return Files.readString(promptFile.toPath());
+    }
+
+    public String getFullResponseHistory(String sessionId) throws IOException {
+        File folder = getSessionFolder(sessionId);
+        File responseFile = new File(folder, "responses.txt");
+        if (!responseFile.exists()) return "";
+        return Files.readString(responseFile.toPath());
     }
 
     public void saveFile(String sessionId, String fileName, byte[] content) throws IOException {
@@ -38,4 +66,18 @@ public class SessionStorageService {
             out.write(content);
         }
     }
+//    public void saveText(String sessionId, String fileName, String content) throws IOException {
+//        File folder = getSessionFolder(sessionId);
+//        File file = new File(folder, fileName);
+//        Files.write(file.toPath(), content.getBytes());
+//
+//    }
+//
+//    public void saveFile(String sessionId, String fileName, byte[] content) throws IOException {
+//        File folder = getSessionFolder(sessionId);
+//        File file = new File(folder, fileName);
+//        try (FileOutputStream out = new FileOutputStream(file)) {
+//            out.write(content);
+//        }
+//    }
 }
