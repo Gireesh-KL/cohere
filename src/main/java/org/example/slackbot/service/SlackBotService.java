@@ -38,14 +38,9 @@ public class SlackBotService {
         this.sessionStorageService = sessionStorageService;
     }
 
-    public void handleMessage(String prompt, String channel, List<Map<String, Object>> files) {
+    public void handleMessage(String userId, String prompt, String channel, List<Map<String, Object>> files) {
         StringBuilder context = new StringBuilder();
         String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
-
-        String userId = "unknown";
-        if (files != null && !files.isEmpty() && files.get(0).get("user") != null) {
-            userId = files.get(0).get("user").toString();
-        }
 
         String sessionId = sessionStorageService.getSessionId(userId, channel);
         StringBuilder contextBuilder = new StringBuilder();
