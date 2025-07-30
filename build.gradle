@@ -75,6 +75,11 @@
 //
 //    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //
+//    implementation 'org.apache.commons:commons-csv:1.8'
+//    implementation 'org.apache.pdfbox:pdfbox:2.0.30'
+//    implementation 'org.apache.pdfbox:fontbox:2.0.30'
+//
+//
 //}
 //
 ////configurations.all {
