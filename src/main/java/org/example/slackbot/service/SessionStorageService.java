@@ -13,8 +13,9 @@ public class SessionStorageService {
 
     private static final String BASE_DIR = "session/";
 
-    public String getSessionId(String userId, String channelId) {
-        return userId + "_" + channelId;
+    public String getSessionId(String threadTs) {
+//        return userId + "_" + channelId;
+        return threadTs;
     }
 
     public File getSessionFolder(String sessionId) {
@@ -22,6 +23,7 @@ public class SessionStorageService {
         if (!folder.exists()) {
             folder.mkdirs();
         }
+        System.out.println(BASE_DIR + sessionId);
         return folder;
     }
 

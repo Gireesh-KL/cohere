@@ -42,7 +42,8 @@ public class SlackBotService {
         StringBuilder context = new StringBuilder();
         String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
 
-        String sessionId = sessionStorageService.getSessionId(userId, channel);
+//        String sessionId = sessionStorageService.getSessionId(userId, channel);
+        String sessionId = sessionStorageService.getSessionId(threadTs);
         StringBuilder contextBuilder = new StringBuilder();
 
         try {
