@@ -38,7 +38,7 @@ public class SlackBotService {
         this.sessionStorageService = sessionStorageService;
     }
 
-    public void handleMessage(String userId, String prompt, String channel, List<Map<String, Object>> files) {
+    public void handleMessage(String userId, String prompt, String channel, List<Map<String, Object>> files, String threadTs) {
         StringBuilder context = new StringBuilder();
         String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
 
@@ -92,7 +92,7 @@ public class SlackBotService {
 //            sessionStorageService.saveText(sessionId, "response_" + System.currentTimeMillis() + ".txt", response);
             sessionStorageService.appendResponse(sessionId, response, null);
             System.out.println("Response sent and saved");
-            slackClient.sendMessage(channel, response);
+            slackClient.sendMessage(channel, response, threadTs);
         } catch (Exception e) {
             throw new SlackProcessingException("Cohere call or Slack message failed", e);
         }

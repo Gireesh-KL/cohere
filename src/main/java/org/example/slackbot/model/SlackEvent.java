@@ -30,6 +30,14 @@ public class SlackEvent {
         private String bot_id;
         private String subtype;
         private List<Map<String, Object>> files;
+        private String ts;
+        private String thread_ts;
+
+        public String getTs() { return ts; }
+        public void setTs(String ts) { this.ts = ts; }
+
+        public String getThread_ts() { return thread_ts; }
+        public void setThread_ts(String thread_ts) { this.thread_ts = thread_ts; }
 
 
 

@@ -14,7 +14,14 @@ public class SlackEventHandler {
     }
 
     public void handleAppMention(SlackEvent.InnerEvent event) {
-        new Thread(() -> slackBotService.handleMessage(event.getUser(), event.getText(), event.getChannel(), event.getFiles())).start();
+        new Thread(() -> slackBotService.handleMessage(
+                event.getUser(),
+                event.getText(),
+                event.getChannel(),
+                event.getFiles(),
+                event.getThread_ts() != null ? event.getThread_ts() : event.getTs()
+        )).start();
     }
+
 }
 

@@ -35,10 +35,13 @@ public class SlackChannelClient {
                 .asBytes();
     }
 
-    public void sendMessage(String channel, String text) throws Exception {
+    public void sendMessage(String channel, String text, String threadTs) throws Exception {
         Map<String, String> payload = new HashMap<>();
         payload.put("channel", channel);
         payload.put("text", text);
+        if (threadTs != null && !threadTs.isEmpty()) {
+            payload.put("thread_ts", threadTs);
+        }
 
         String response = Request.post("https://slack.com/api/chat.postMessage")
                 .addHeader("Authorization", "Bearer " + config.getSlackBotToken())
