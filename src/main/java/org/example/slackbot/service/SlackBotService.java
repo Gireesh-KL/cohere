@@ -92,6 +92,7 @@ public class SlackBotService {
 //            sessionStorageService.saveText(sessionId, "response_" + System.currentTimeMillis() + ".txt", response);
             sessionStorageService.appendResponse(sessionId, response, null);
             System.out.println("Response sent and saved");
+            System.out.println("Thread ID: " + threadTs);
             slackClient.sendMessage(channel, response, threadTs);
         } catch (Exception e) {
             throw new SlackProcessingException("Cohere call or Slack message failed", e);
