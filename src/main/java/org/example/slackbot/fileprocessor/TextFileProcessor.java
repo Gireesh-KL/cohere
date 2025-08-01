@@ -64,7 +64,7 @@ public class TextFileProcessor implements FileProcessor {
 
                         String hashContent = currentErrorBlock.toString().replaceFirst("Timestamp: .*?\\|", "");
                         String hash = DigestUtils.sha256Hex(hashContent);
-
+                        System.out.println("Hashed Content: " + hashContent);
                         if (!errorHashes.contains(hash)) {
                             errorCount++;
                             allErrors.append("[ERROR ").append(errorCount).append("]\n")
@@ -84,7 +84,6 @@ public class TextFileProcessor implements FileProcessor {
 
             if (insideErrorBlock && !currentErrorBlock.isEmpty()) {
                 String hashContent = currentErrorBlock.toString().replaceAll("Timestamp: .*?\\|", "");
-                System.out.println("Hashed Content: " + hashContent);
                 String hash = DigestUtils.sha256Hex(hashContent);
                 if (!errorHashes.contains(hash)) {
                     errorCount++;
