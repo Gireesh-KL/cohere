@@ -148,16 +148,19 @@ public class TextFileProcessor implements FileProcessor {
             String line;
             int errorCount = 0;
             boolean insideErrorBlock = false;
+            int stackTraceLines = 0;
             StringBuilder currentErrorBlock = new StringBuilder();
 
             while ((line = reader.readLine()) != null) {
                 if (line.contains("| ERROR |")) {
                     insideErrorBlock = true;
+                    stackTraceLines = 0;
                     currentErrorBlock.append(line).append("\n");
                 } else if (insideErrorBlock) {
-                    if (line.trim().startsWith("at") || !line.contains("|")) {
+                    if ((line.trim().startsWith("at") || !line.contains("|")) && stackTraceLines < 10) {
                         currentErrorBlock.append(line.trim()).append("\n");
-                    } else {
+                        stackTraceLines++;
+                    } else if (line.contains("|")) {
                         insideErrorBlock = false;
 
                         String hashContent = currentErrorBlock.toString().replaceFirst("Timestamp: .*?\\|", "");
@@ -173,6 +176,8 @@ public class TextFileProcessor implements FileProcessor {
                         currentErrorBlock.setLength(0);
                         if (line.contains("| ERROR |")) {
                             insideErrorBlock = true;
+                            stackTraceLines = 0;
+                            currentErrorBlock.setLength(0);
                             currentErrorBlock.append(line).append("\n");
                         }
                     }
