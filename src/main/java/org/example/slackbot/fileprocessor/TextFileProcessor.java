@@ -194,6 +194,7 @@ public class TextFileProcessor implements FileProcessor {
             return "[Error extracting error logs: " + e.getMessage() + "]";
         }
 
+        System.out.println(allErrors.toString());
         return allErrors.isEmpty() ? "[No error logs found.]" : allErrors.toString();
     }
 
