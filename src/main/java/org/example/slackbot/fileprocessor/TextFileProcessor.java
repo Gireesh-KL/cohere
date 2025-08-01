@@ -20,8 +20,6 @@ public class TextFileProcessor implements FileProcessor {
     @Value("${fileprocessor.text.error-prefix}")
     private String errorPrefix;
 
-    @Value("${fileprocessor.text.timestamp-regex}")
-    private String timestampRegex;
     @Override
     public boolean supports(String mimeType) {
         return mimeType.startsWith("text/") || mimeType.equals("application/octet-stream");
@@ -72,7 +70,7 @@ public class TextFileProcessor implements FileProcessor {
                         insideErrorBlock = false;
 
                         String hashContent = currentErrorBlock.toString()
-                                .replaceAll("(?m)" + timestampRegex, "");
+                                .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
                         String hash = DigestUtils.sha256Hex(hashContent);
                         System.out.println("Hashed Content: " + hashContent);
                         if (!errorHashes.contains(hash)) {
@@ -94,7 +92,7 @@ public class TextFileProcessor implements FileProcessor {
 
             if (insideErrorBlock && !currentErrorBlock.isEmpty()) {
                 String hashContent = currentErrorBlock.toString()
-                        .replaceAll("(?m)" + timestampRegex, "");
+                        .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
                 String hash = DigestUtils.sha256Hex(hashContent);
                 if (!errorHashes.contains(hash)) {
                     errorCount++;
