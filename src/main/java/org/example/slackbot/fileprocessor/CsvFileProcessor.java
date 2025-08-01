@@ -1,5 +1,6 @@
 package org.example.slackbot.fileprocessor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -11,6 +12,9 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class CsvFileProcessor implements FileProcessor {
+
+    @Value("${fileprocessor.csv.max-lines}")
+    private int maxLines;
     @Override
     public boolean supports(String mimeType) {
         return mimeType.equals("text/csv");
@@ -27,7 +31,7 @@ public class CsvFileProcessor implements FileProcessor {
             for (CSVRecord record : csvParser) {
                 content.append(record.toString()).append("\n");
                 lineCount++;
-                if (lineCount >= 100) break;
+                if (lineCount >= maxLines) break;
             }
         } catch (Exception e) {
             return "[Error processing CSV: " + e.getMessage() + "]";

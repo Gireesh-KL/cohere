@@ -2,6 +2,7 @@ package org.example.slackbot.service;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.time.Instant;
@@ -10,10 +11,13 @@ import java.util.Objects;
 @Component
 public class SessionCleaner {
 
-    private static final String BASE_DIR = "session/";
-    private static final long EXPIRATION_MS = 24 * 7 * 60 * 60 * 1000;
+    @Value("${session.base-dir}")
+    private String BASE_DIR;
 
-    @Scheduled(fixedRate = 604800000)
+    @Value("${session.expiration-ms}") // default: 7 days
+    private long EXPIRATION_MS;
+
+    @Scheduled(fixedRateString = "${session.cleanup-rate-ms}")
     public void cleanOldSessions() {
         File baseDir = new File(BASE_DIR);
         if (!baseDir.exists()) return;

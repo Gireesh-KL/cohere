@@ -1,5 +1,6 @@
 package org.example.slackbot.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -11,7 +12,14 @@ import java.nio.file.Files;
 @Service
 public class SessionStorageService {
 
-    private static final String BASE_DIR = "session/";
+    @Value("${session.base-dir}")
+    private String BASE_DIR;
+
+    @Value("${session.prompt-file}")
+    private String promptFileName;
+
+    @Value("${session.response-file}")
+    private String responseFileName;
 
     public String getSessionId(String threadTs) {
         return threadTs;
@@ -31,7 +39,7 @@ public class SessionStorageService {
 
     public void appendPrompt(String sessionId, String prompt, String sourceFileName) throws IOException {
         File folder = getSessionFolder(sessionId);
-        File file = new File(folder, "prompts.txt");
+        File file = new File(folder, promptFileName);
         try (FileWriter writer = new FileWriter(file, true)) {
             writer.write("[Prompt");
             if (sourceFileName != null) writer.write(" from: " + sourceFileName);
@@ -41,7 +49,7 @@ public class SessionStorageService {
 
     public void appendResponse(String sessionId, String response, String sourceFileName) throws IOException {
         File folder = getSessionFolder(sessionId);
-        File file = new File(folder, "responses.txt");
+        File file = new File(folder, responseFileName);
         try (FileWriter writer = new FileWriter(file, true)) {
             writer.write("[Response");
             if (sourceFileName != null) writer.write(" for: " + sourceFileName);
@@ -51,14 +59,14 @@ public class SessionStorageService {
 
     public String getFullPromptHistory(String sessionId) throws IOException {
         File folder = getSessionFolder(sessionId);
-        File promptFile = new File(folder, "prompts.txt");
+        File promptFile = new File(folder, promptFileName);
         if (!promptFile.exists()) return "";
         return Files.readString(promptFile.toPath());
     }
 
     public String getFullResponseHistory(String sessionId) throws IOException {
         File folder = getSessionFolder(sessionId);
-        File responseFile = new File(folder, "responses.txt");
+        File responseFile = new File(folder, responseFileName);
         if (!responseFile.exists()) return "";
         return Files.readString(responseFile.toPath());
     }

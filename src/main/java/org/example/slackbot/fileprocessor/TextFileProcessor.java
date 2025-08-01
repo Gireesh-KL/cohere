@@ -2,6 +2,7 @@ package org.example.slackbot.fileprocessor;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -13,6 +14,14 @@ import java.util.Set;
 @Component
 public class TextFileProcessor implements FileProcessor {
 
+    @Value("${fileprocessor.text.max-stack-lines}")
+    private int maxStackTraceLines;
+
+    @Value("${fileprocessor.text.error-prefix}")
+    private String errorPrefix;
+
+    @Value("${fileprocessor.text.timestamp-regex}")
+    private String timestampRegex;
     @Override
     public boolean supports(String mimeType) {
         return mimeType.startsWith("text/") || mimeType.equals("application/octet-stream");
@@ -51,19 +60,19 @@ public class TextFileProcessor implements FileProcessor {
             StringBuilder currentErrorBlock = new StringBuilder();
 
             while ((line = reader.readLine()) != null) {
-                if (line.contains("| ERROR |")) {
+                if (line.contains(errorPrefix)) {
                     insideErrorBlock = true;
                     stackTraceLines = 0;
                     currentErrorBlock.append(line).append("\n");
                 } else if (insideErrorBlock) {
-                    if ((line.trim().startsWith("at") || !line.contains("|")) && stackTraceLines <= 10) {
+                    if ((line.trim().startsWith("at") || !line.contains("|")) && stackTraceLines <= maxStackTraceLines) {
                         currentErrorBlock.append(line.trim()).append("\n");
                         stackTraceLines++;
                     } else if (line.contains("|")) {
                         insideErrorBlock = false;
 
                         String hashContent = currentErrorBlock.toString()
-                                .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
+                                .replaceAll("(?m)" + timestampRegex, "");
                         String hash = DigestUtils.sha256Hex(hashContent);
                         System.out.println("Hashed Content: " + hashContent);
                         if (!errorHashes.contains(hash)) {
@@ -74,7 +83,7 @@ public class TextFileProcessor implements FileProcessor {
                         }
 
                         currentErrorBlock.setLength(0);
-                        if (line.contains("| ERROR |")) {
+                        if (line.contains(errorPrefix)) {
                             insideErrorBlock = true;
                             stackTraceLines = 0;
                             currentErrorBlock.append(line).append("\n");
@@ -85,7 +94,7 @@ public class TextFileProcessor implements FileProcessor {
 
             if (insideErrorBlock && !currentErrorBlock.isEmpty()) {
                 String hashContent = currentErrorBlock.toString()
-                        .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
+                        .replaceAll("(?m)" + timestampRegex, "");
                 String hash = DigestUtils.sha256Hex(hashContent);
                 if (!errorHashes.contains(hash)) {
                     errorCount++;
