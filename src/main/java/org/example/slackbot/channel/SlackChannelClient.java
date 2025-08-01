@@ -19,14 +19,6 @@ public class SlackChannelClient {
         this.config = config;
     }
 
-    public String downloadFile(String fileUrl) throws Exception {
-        return Request.get(fileUrl)
-                .addHeader("Authorization", "Bearer " + config.getSlackBotToken())
-                .execute()
-                .returnContent()
-                .asString();
-    }
-
     public byte[] downloadFileAsBytes(String fileUrl) throws Exception {
         return Request.get(fileUrl)
                 .addHeader("Authorization", "Bearer " + config.getSlackBotToken())

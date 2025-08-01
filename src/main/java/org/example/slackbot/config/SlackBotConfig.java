@@ -1,8 +1,10 @@
 package org.example.slackbot.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+@Getter
 @Configuration
 public class SlackBotConfig {
     @Value("${cohere.api.key}")
@@ -14,15 +16,4 @@ public class SlackBotConfig {
     @Value("${slack.bot.user-id}")
     private String slackBotUserId;
 
-    public String getCohereApiKey() {
-        return cohereApiKey;
-    }
-
-    public String getSlackBotToken() {
-        return slackBotToken;
-    }
-
-    public String getSlackBotUserId() {
-        return slackBotUserId;
-    }
 }

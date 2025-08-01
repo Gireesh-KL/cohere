@@ -4,18 +4,12 @@ import org.example.slackbot.client.CohereClient;
 import org.example.slackbot.channel.SlackChannelClient;
 import org.example.slackbot.common.exception.SlackProcessingException;
 import org.example.slackbot.config.SlackBotConfig;
-import org.example.slackbot.model.SlackEvent;
 import org.example.slackbot.process.FileProcessingContext;
 import org.springframework.stereotype.Service;
-import org.example.slackbot.fileprocessor.FileProcessor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SlackBotService {
@@ -38,11 +32,9 @@ public class SlackBotService {
         this.sessionStorageService = sessionStorageService;
     }
 
-    public void handleMessage(String userId, String prompt, String channel, List<Map<String, Object>> files, String threadTs) {
+    public void handleMessage(String prompt, String channel, List<Map<String, Object>> files, String threadTs) {
         StringBuilder context = new StringBuilder();
         String cleanedPrompt = prompt.replaceAll("<@\\w+>", "").trim();
-
-//        String sessionId = sessionStorageService.getSessionId(userId, channel);
         String sessionId = sessionStorageService.getSessionId(threadTs);
         StringBuilder contextBuilder = new StringBuilder();
 
@@ -72,7 +64,7 @@ public class SlackBotService {
 
                     System.out.println("Session [" + sessionId + "] updated. Files in session folder:");
                     File folder = sessionStorageService.getSessionFolder(sessionId);
-                    for (File f : folder.listFiles()) {
+                    for (File f : Objects.requireNonNull(folder.listFiles())) {
                         System.out.println(" - " + f.getName());
                     }
 
@@ -90,7 +82,6 @@ public class SlackBotService {
 
         try {
             String response = cohereClient.callCohere(config.getCohereApiKey(), "Previous context was this: " + contextBuilder + "\nNow User Prompt is: " + context + "\n\n" + cleanedPrompt);
-//            sessionStorageService.saveText(sessionId, "response_" + System.currentTimeMillis() + ".txt", response);
             sessionStorageService.appendResponse(sessionId, response, null);
             System.out.println("Response sent and saved");
             System.out.println("Thread ID: " + threadTs);

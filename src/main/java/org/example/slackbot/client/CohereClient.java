@@ -3,6 +3,7 @@ package org.example.slackbot.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
 import org.springframework.stereotype.Component;
@@ -11,13 +12,20 @@ import org.springframework.stereotype.Component;
 public class CohereClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${cohere.api.max_tokens}")
+    private int maxTokens;
 
+    @Value("${cohere.api.temperature}")
+    private double temperature;
+
+    @Value("${cohere.api.model}")
+    private String model;
     public String callCohere(String apiKey, String userPrompt) throws Exception {
         ObjectNode requestBody = objectMapper.createObjectNode();
-        requestBody.put("model", "command-r-plus");
+        requestBody.put("model", model);
         requestBody.put("prompt", userPrompt);
-        requestBody.put("max_tokens", 1000);
-        requestBody.put("temperature", 0.7);
+        requestBody.put("max_tokens", maxTokens);
+        requestBody.put("temperature", temperature);
 
         String response = Request.post("https://api.cohere.ai/v1/generate")
                 .addHeader("Authorization", "Bearer " + apiKey)

@@ -14,14 +14,16 @@ public class SessionStorageService {
     private static final String BASE_DIR = "session/";
 
     public String getSessionId(String threadTs) {
-//        return userId + "_" + channelId;
         return threadTs;
     }
 
     public File getSessionFolder(String sessionId) {
         File folder = new File(BASE_DIR + sessionId);
         if (!folder.exists()) {
-            folder.mkdirs();
+            boolean flag = folder.mkdirs();
+            if(!flag){
+                System.out.println("Failed to create directory: " + folder.getAbsolutePath());
+            }
         }
         System.out.println(BASE_DIR + sessionId);
         return folder;
@@ -68,18 +70,4 @@ public class SessionStorageService {
             out.write(content);
         }
     }
-//    public void saveText(String sessionId, String fileName, String content) throws IOException {
-//        File folder = getSessionFolder(sessionId);
-//        File file = new File(folder, fileName);
-//        Files.write(file.toPath(), content.getBytes());
-//
-//    }
-//
-//    public void saveFile(String sessionId, String fileName, byte[] content) throws IOException {
-//        File folder = getSessionFolder(sessionId);
-//        File file = new File(folder, fileName);
-//        try (FileOutputStream out = new FileOutputStream(file)) {
-//            out.write(content);
-//        }
-//    }
 }

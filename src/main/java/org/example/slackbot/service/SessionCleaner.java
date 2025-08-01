@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Objects;
 
 @Component
 public class SessionCleaner {
@@ -33,10 +34,13 @@ public class SessionCleaner {
 
     private void deleteDirectory(File dir) {
         if (dir.isDirectory()) {
-            for (File file : dir.listFiles()) {
+            for (File file : Objects.requireNonNull(dir.listFiles())) {
                 deleteDirectory(file);
             }
         }
-        dir.delete();
+        boolean flag = dir.delete();
+        if(!flag){
+            System.out.println("Failed to delete directory: " + dir.getAbsolutePath());
+        }
     }
 }
