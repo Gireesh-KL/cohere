@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -177,7 +178,6 @@ public class TextFileProcessor implements FileProcessor {
                         if (line.contains("| ERROR |")) {
                             insideErrorBlock = true;
                             stackTraceLines = 0;
-                            currentErrorBlock.setLength(0);
                             currentErrorBlock.append(line).append("\n");
                         }
                     }
@@ -185,7 +185,8 @@ public class TextFileProcessor implements FileProcessor {
             }
 
             if (insideErrorBlock && currentErrorBlock.length() > 0) {
-                String hashContent = currentErrorBlock.toString().replaceFirst("Timestamp: .*?\\|", "");
+                String hashContent = currentErrorBlock.toString().replaceAll("Timestamp: .*?\\|", "");
+//                System.out.println("Hashed Content: " + hashContent);
                 String hash = DigestUtils.sha256Hex(hashContent);
                 if (!errorHashes.contains(hash)) {
                     errorCount++;
@@ -199,7 +200,7 @@ public class TextFileProcessor implements FileProcessor {
             return "[Error extracting error logs: " + e.getMessage() + "]";
         }
 
-        System.out.println(allErrors.toString());
+        System.out.println("All error list: " + allErrors.toString());
         return allErrors.isEmpty() ? "[No error logs found.]" : allErrors.toString();
     }
 
