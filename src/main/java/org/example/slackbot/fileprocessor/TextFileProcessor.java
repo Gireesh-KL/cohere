@@ -62,7 +62,8 @@ public class TextFileProcessor implements FileProcessor {
                     } else if (line.contains("|")) {
                         insideErrorBlock = false;
 
-                        String hashContent = currentErrorBlock.toString().replaceAll("^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
+                        String hashContent = currentErrorBlock.toString()
+                                .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
                         String hash = DigestUtils.sha256Hex(hashContent);
                         System.out.println("Hashed Content: " + hashContent);
                         if (!errorHashes.contains(hash)) {
@@ -83,7 +84,8 @@ public class TextFileProcessor implements FileProcessor {
             }
 
             if (insideErrorBlock && !currentErrorBlock.isEmpty()) {
-                String hashContent = currentErrorBlock.toString().replaceAll("^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
+                String hashContent = currentErrorBlock.toString()
+                        .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}:\\d{3}\\s\\|\\s", "");
                 String hash = DigestUtils.sha256Hex(hashContent);
                 if (!errorHashes.contains(hash)) {
                     errorCount++;
