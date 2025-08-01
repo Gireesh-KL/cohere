@@ -56,7 +56,7 @@ public class TextFileProcessor implements FileProcessor {
                     stackTraceLines = 0;
                     currentErrorBlock.append(line).append("\n");
                 } else if (insideErrorBlock) {
-                    if ((line.trim().startsWith("at") || !line.contains("|")) && stackTraceLines < 10) {
+                    if ((line.trim().startsWith("at") || !line.contains("|")) && stackTraceLines <= 10) {
                         currentErrorBlock.append(line.trim()).append("\n");
                         stackTraceLines++;
                     } else if (line.contains("|")) {
@@ -84,6 +84,7 @@ public class TextFileProcessor implements FileProcessor {
 
             if (insideErrorBlock && !currentErrorBlock.isEmpty()) {
                 String hashContent = currentErrorBlock.toString().replaceAll("Timestamp: .*?\\|", "");
+                System.out.println("Hashed Content: " + hashContent);
                 String hash = DigestUtils.sha256Hex(hashContent);
                 if (!errorHashes.contains(hash)) {
                     errorCount++;
